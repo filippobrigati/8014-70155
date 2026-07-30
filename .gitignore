@@ -1,0 +1,7 @@
+./vendor/
+/vendor/
+*.lock
+./vscode
+/vscode
+settings.json
+.DS_Store
