@@ -57,7 +57,6 @@ class Database
             $uri = "mongodb://{$this->mongoHost}:{$this->mongoPort}";
             $client = new MongoClient($uri);
 
-            // Il database verrà creato in automatico da MongoDB al primo inserimento
             $this->mongoConnection = $client->centro_medico_logs;
         } catch (\Exception $e) {
             die("Errore di connessione MongoDB: " . $e->getMessage());

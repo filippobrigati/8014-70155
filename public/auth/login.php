@@ -7,14 +7,15 @@ require_once __DIR__ . '/../../src/Config/Database.php';
 require_once __DIR__ . '/../../src/Controllers/AuthController.php';
 
 $messaggioErrore = '';
-
+// Se il metodo e' post allora e' stato inviato il form e provo a fare il login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-
+    // Instanzio una classe del controller per il login
     $controller = new \Controllers\AuthController();
+    // Eseguo il login tramite la funzione
     $risultato = $controller->login($email, $password);
-
+    // Se ho un messaggio (di errore, perche' il redirect viene fatto nel controller) ed e' una stringa lo assegno e lo mostro
     if (is_string($risultato)) {
         $messaggioErrore = $risultato;
     }

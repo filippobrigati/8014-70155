@@ -66,10 +66,9 @@ class AuthController
     public function registrazioneUtente($email, $password, $ruolo, $datiAnagrafici)
     {
         $db = Database::getInstance()->getMySQL();
-        // 1. Genera l'hash sicuro della password
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-        $stmt = $db->prepare("CALL sp_registra_utente(:email, :password, :ruolo, :cf, :nome, :cognome, :anno, :sesso)");
+        $stmt = $db->prepare("CALL sp_registra_utente(:email, :password, :ruolo, :cf, :nome, :cognome, :data_nascita, :sesso)");
 
         return $stmt->execute([
             ':email' => $email,
@@ -78,7 +77,7 @@ class AuthController
             ':cf' => $datiAnagrafici['codice_fiscale'],
             ':nome' => $datiAnagrafici['nome'],
             ':cognome' => $datiAnagrafici['cognome'],
-            ':anno' => $datiAnagrafici['anno_nascita'],
+            ':data_nascita' => $datiAnagrafici['data_nascita'],
             ':sesso' => $datiAnagrafici['sesso']
         ]);
     }
