@@ -27,14 +27,14 @@ if (!$centro) {
 $partita_iva_centro = $centro['partita_iva'];
 
 // Seleziono tutte le specializzazioni disponibili per il centro medico
-$stmtSpec = $db->prepare("
+$stmtSpecial = $db->prepare("
     SELECT id, nome 
     FROM Specializzazione 
     WHERE partita_iva_centro = :piva 
     ORDER BY nome ASC
 ");
-$stmtSpec->execute([':piva' => $partita_iva_centro]);
-$specializzazioni = $stmtSpec->fetchAll(PDO::FETCH_ASSOC); // in questo modo ritorno un array dove ogni riga ha come chiave
+$stmtSpecial->execute([':piva' => $partita_iva_centro]);
+$specializzazioni = $stmtSpecial->fetchAll(PDO::FETCH_ASSOC); // in questo modo ritorno un array dove ogni riga ha come chiave
 // le colonne della tabella
 
 $messaggio = '';
@@ -67,11 +67,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Creo l'hash della password
             $passwordHash = password_hash($password, PASSWORD_DEFAULT);
             // Inserisco la riga utente nella tabella Utenti con il ruolo 'medico'
-            $stmtInsertUser = $db->prepare("
+            $stmtInserimentoUtente = $db->prepare("
                 INSERT INTO Utente (email, password_hash, ruolo, codice_fiscale, nome, cognome, data_nascita, sesso, telefono)
                 VALUES (:email, :password, 'medico', :cf, :nome, :cognome, :data_nascita, :sesso, :telefono)
             ");
-            $stmtInsertUser->execute([
+            $stmtInserimentoUtente->execute([
                 ':email' => $email,
                 ':password' => $passwordHash,
                 ':cf' => $cf,
@@ -92,13 +92,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ':piva' => $partita_iva_centro
             ]);
             // Abbino le specializzazioni selezionate al medico appena inserito, con i relativi costi e durata
-            $stmtLinkSpec = $db->prepare("
+            $abbinamentoSpecializzazioni = $db->prepare("
                 INSERT INTO Medico_Specializzazione (id_medico, id_specializzazione, costo, durata_minuti)
                 VALUES (:id_medico, :id_spec, :costo, :durata)
             ");
 
             for ($i = 0; $i < count($id_specs); $i++) {
-                $stmtLinkSpec->execute([
+                $abbinamentoSpecializzazioni->execute([
                     ':id_medico' => $id_medico,
                     ':id_spec' => $id_specs[$i],
                     ':costo' => $costi[$i],

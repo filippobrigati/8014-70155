@@ -243,13 +243,13 @@ $mesi_it = ['January' => 'Gennaio', 'February' => 'Febbraio', 'March' => 'Marzo'
 
                                     <?php if ($cancellabile): ?>
                                         <div class="row g-2">
-                                            <div class="col-sm-6">
+                                            <!-- <div class="col-sm-6">
                                                 <a href="/cliente/prenota.php?step=4&id_centro=<?php echo urlencode($visita['id_centro']); ?>&id_spec=<?php echo $visita['id_spec']; ?>&id_medico=<?php echo $visita['id_medico']; ?>"
                                                     class="btn btn-outline-primary w-100">
                                                     Riprogramma Ora
                                                 </a>
-                                            </div>
-                                            <div class="col-sm-6">
+                                            </div> -->
+                                            <div class="col-sm-12">
                                                 <form method="POST" action=""
                                                     onsubmit="return confirm('Sei sicuro di voler annullare definitivamente questa visita?');">
                                                     <input type="hidden" name="codice_visita"
@@ -259,10 +259,6 @@ $mesi_it = ['January' => 'Gennaio', 'February' => 'Febbraio', 'March' => 'Marzo'
                                                 </form>
                                             </div>
                                         </div>
-                                        <p class="small text-center mt-2 mb-0">
-                                            Per modificare data o ora, clicca "Riprogramma".
-                                            <strong>Ricordati poi di annullare</strong> questo vecchio appuntamento.
-                                        </p>
                                     <?php else: ?>
                                         <div class="alert alert-warning mb-0">
                                             Mancano meno di 3 giorni a questa

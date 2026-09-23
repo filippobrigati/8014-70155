@@ -1,5 +1,3 @@
--- basi_di_dati.Assicurazione definition
-
 CREATE TABLE `Assicurazione` (
   `id` int NOT NULL AUTO_INCREMENT,
   `nome` varchar(100) NOT NULL,
@@ -10,10 +8,7 @@ CREATE TABLE `Assicurazione` (
   UNIQUE KEY `codice` (`codice`),
   UNIQUE KEY `partita_iva` (`partita_iva`),
   CONSTRAINT `chk_sconto_percentuale` CHECK (((`sconto_percentuale` >= 0) and (`sconto_percentuale` <= 100)))
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Citta_CAP definition
+);
 
 CREATE TABLE `Citta_CAP` (
   `cap` char(5) NOT NULL,
@@ -21,10 +16,7 @@ CREATE TABLE `Citta_CAP` (
   `provincia` char(2) NOT NULL,
   `regione` varchar(50) NOT NULL,
   PRIMARY KEY (`cap`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Metodo_Pagamento definition
+);
 
 CREATE TABLE `Metodo_Pagamento` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -32,10 +24,7 @@ CREATE TABLE `Metodo_Pagamento` (
   `attivo` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `descrizione` (`descrizione`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Utente definition
+);
 
 CREATE TABLE `Utente` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -51,10 +40,7 @@ CREATE TABLE `Utente` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`),
   UNIQUE KEY `codice_fiscale` (`codice_fiscale`,`ruolo`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Agenda_Presenze definition
+);
 
 CREATE TABLE `Agenda_Presenze` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -64,12 +50,9 @@ CREATE TABLE `Agenda_Presenze` (
   `ora_fine` time NOT NULL,
   PRIMARY KEY (`id`),
   KEY `id_medico` (`id_medico`),
-  CONSTRAINT `agenda_presenze_ibfk_1` FOREIGN KEY (`id_medico`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `agenda_presenze_1` FOREIGN KEY (`id_medico`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
   CONSTRAINT `agenda_presenze_chk_1` CHECK ((`giorno_settimana` between 1 and 5))
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Centro_Medico definition
+);
 
 CREATE TABLE `Centro_Medico` (
   `partita_iva` varchar(11) NOT NULL,
@@ -82,35 +65,26 @@ CREATE TABLE `Centro_Medico` (
   `totale_incasso` decimal(12,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`partita_iva`),
   KEY `cap` (`cap`),
-  CONSTRAINT `centro_medico_ibfk_1` FOREIGN KEY (`cap`) REFERENCES `Citta_CAP` (`cap`) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Cliente_Assicurazione definition
+  CONSTRAINT `centro_medico_1` FOREIGN KEY (`cap`) REFERENCES `Citta_CAP` (`cap`) ON DELETE RESTRICT
+);
 
 CREATE TABLE `Cliente_Assicurazione` (
   `id_cliente` int NOT NULL,
   `id_assicurazione` int NOT NULL,
   PRIMARY KEY (`id_cliente`),
   KEY `id_assicurazione` (`id_assicurazione`),
-  CONSTRAINT `cliente_ass_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `cliente_ass_ibfk_2` FOREIGN KEY (`id_assicurazione`) REFERENCES `Assicurazione` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Medico_Centro definition
+  CONSTRAINT `cliente_ass_1` FOREIGN KEY (`id_cliente`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `cliente_ass_2` FOREIGN KEY (`id_assicurazione`) REFERENCES `Assicurazione` (`id`) ON DELETE CASCADE
+);
 
 CREATE TABLE `Medico_Centro` (
   `id_medico` int NOT NULL,
   `partita_iva_centro` varchar(11) NOT NULL,
   PRIMARY KEY (`id_medico`,`partita_iva_centro`),
   KEY `partita_iva_centro` (`partita_iva_centro`),
-  CONSTRAINT `medico_centro_ibfk_1` FOREIGN KEY (`id_medico`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `medico_centro_ibfk_2` FOREIGN KEY (`partita_iva_centro`) REFERENCES `Centro_Medico` (`partita_iva`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Sessione_Utente definition
+  CONSTRAINT `medico_centro_1` FOREIGN KEY (`id_medico`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `medico_centro_2` FOREIGN KEY (`partita_iva_centro`) REFERENCES `Centro_Medico` (`partita_iva`) ON DELETE CASCADE
+);
 
 CREATE TABLE `Sessione_Utente` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -120,11 +94,8 @@ CREATE TABLE `Sessione_Utente` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `token_hash` (`token_hash`),
   KEY `id_utente` (`id_utente`),
-  CONSTRAINT `sessione_utente_ibfk_1` FOREIGN KEY (`id_utente`) REFERENCES `Utente` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=65 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Specializzazione definition
+  CONSTRAINT `sessione_utente_1` FOREIGN KEY (`id_utente`) REFERENCES `Utente` (`id`) ON DELETE CASCADE
+);
 
 CREATE TABLE `Specializzazione` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -135,11 +106,8 @@ CREATE TABLE `Specializzazione` (
   KEY `id_padre` (`id_padre`),
   KEY `fk_spec_centro` (`partita_iva_centro`),
   CONSTRAINT `fk_spec_centro` FOREIGN KEY (`partita_iva_centro`) REFERENCES `Centro_Medico` (`partita_iva`) ON DELETE CASCADE,
-  CONSTRAINT `specializzazione_ibfk_1` FOREIGN KEY (`id_padre`) REFERENCES `Specializzazione` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Statistiche_Medico definition
+  CONSTRAINT `specializzazione_1` FOREIGN KEY (`id_padre`) REFERENCES `Specializzazione` (`id`) ON DELETE SET NULL
+);
 
 CREATE TABLE `Statistiche_Medico` (
   `id_medico` int NOT NULL,
@@ -147,10 +115,7 @@ CREATE TABLE `Statistiche_Medico` (
   `numero_recensioni` int NOT NULL DEFAULT '0',
   PRIMARY KEY (`id_medico`),
   CONSTRAINT `fk_statistiche_medico` FOREIGN KEY (`id_medico`) REFERENCES `Utente` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Visita definition
+);
 
 CREATE TABLE `Visita` (
   `codice` int NOT NULL AUTO_INCREMENT,
@@ -170,25 +135,19 @@ CREATE TABLE `Visita` (
   KEY `id_cliente` (`id_cliente`),
   KEY `id_medico` (`id_medico`),
   KEY `id_specializzazione` (`id_specializzazione`),
-  CONSTRAINT `visita_ibfk_1` FOREIGN KEY (`id_cliente`) REFERENCES `Utente` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `visita_ibfk_2` FOREIGN KEY (`id_medico`) REFERENCES `Utente` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `visita_ibfk_3` FOREIGN KEY (`id_specializzazione`) REFERENCES `Specializzazione` (`id`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Admin_Centro definition
+  CONSTRAINT `visita_1` FOREIGN KEY (`id_cliente`) REFERENCES `Utente` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `visita_2` FOREIGN KEY (`id_medico`) REFERENCES `Utente` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `visita_3` FOREIGN KEY (`id_specializzazione`) REFERENCES `Specializzazione` (`id`) ON DELETE RESTRICT
+);
 
 CREATE TABLE `Admin_Centro` (
   `id_admin` int NOT NULL,
   `partita_iva_centro` varchar(11) NOT NULL,
   PRIMARY KEY (`id_admin`,`partita_iva_centro`),
   KEY `partita_iva_centro` (`partita_iva_centro`),
-  CONSTRAINT `admin_centro_ibfk_1` FOREIGN KEY (`id_admin`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `admin_centro_ibfk_2` FOREIGN KEY (`partita_iva_centro`) REFERENCES `Centro_Medico` (`partita_iva`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Fattura definition
+  CONSTRAINT `admin_centro_1` FOREIGN KEY (`id_admin`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `admin_centro_2` FOREIGN KEY (`partita_iva_centro`) REFERENCES `Centro_Medico` (`partita_iva`) ON DELETE CASCADE
+);
 
 CREATE TABLE `Fattura` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -201,11 +160,8 @@ CREATE TABLE `Fattura` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `numero_fattura` (`numero_fattura`),
   UNIQUE KEY `codice_visita` (`codice_visita`),
-  CONSTRAINT `fattura_ibfk_1` FOREIGN KEY (`codice_visita`) REFERENCES `Visita` (`codice`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Fatturazione_Con_Assicurazione definition
+  CONSTRAINT `fattura_1` FOREIGN KEY (`codice_visita`) REFERENCES `Visita` (`codice`) ON DELETE RESTRICT
+);
 
 CREATE TABLE `Fatturazione_Con_Assicurazione` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -222,11 +178,8 @@ CREATE TABLE `Fatturazione_Con_Assicurazione` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `numero_fattura` (`numero_fattura`),
   UNIQUE KEY `codice_visita` (`codice_visita`),
-  CONSTRAINT `fattura_ass_ibfk_1` FOREIGN KEY (`codice_visita`) REFERENCES `Visita` (`codice`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Medico_Specializzazione definition
+  CONSTRAINT `fattura_ass_1` FOREIGN KEY (`codice_visita`) REFERENCES `Visita` (`codice`) ON DELETE RESTRICT
+);
 
 CREATE TABLE `Medico_Specializzazione` (
   `id_medico` int NOT NULL,
@@ -235,12 +188,9 @@ CREATE TABLE `Medico_Specializzazione` (
   `durata_minuti` smallint NOT NULL,
   PRIMARY KEY (`id_medico`,`id_specializzazione`),
   KEY `id_specializzazione` (`id_specializzazione`),
-  CONSTRAINT `medico_specializzazione_ibfk_1` FOREIGN KEY (`id_medico`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
-  CONSTRAINT `medico_specializzazione_ibfk_2` FOREIGN KEY (`id_specializzazione`) REFERENCES `Specializzazione` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Recensione definition
+  CONSTRAINT `medico_specializzazione_1` FOREIGN KEY (`id_medico`) REFERENCES `Utente` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `medico_specializzazione_2` FOREIGN KEY (`id_specializzazione`) REFERENCES `Specializzazione` (`id`) ON DELETE CASCADE
+);
 
 CREATE TABLE `Recensione` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -250,12 +200,9 @@ CREATE TABLE `Recensione` (
   `data_inserimento` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `codice_visita` (`codice_visita`),
-  CONSTRAINT `recensione_ibfk_1` FOREIGN KEY (`codice_visita`) REFERENCES `Visita` (`codice`) ON DELETE CASCADE,
+  CONSTRAINT `recensione_1` FOREIGN KEY (`codice_visita`) REFERENCES `Visita` (`codice`) ON DELETE CASCADE,
   CONSTRAINT `recensione_chk_1` CHECK ((`punteggio` between 1 and 5))
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-
--- basi_di_dati.Referto definition
+);
 
 CREATE TABLE `Referto` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -264,5 +211,5 @@ CREATE TABLE `Referto` (
   `data_creazione` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `codice_visita` (`codice_visita`),
-  CONSTRAINT `referto_ibfk_1` FOREIGN KEY (`codice_visita`) REFERENCES `Visita` (`codice`) ON DELETE RESTRICT
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+  CONSTRAINT `referto_1` FOREIGN KEY (`codice_visita`) REFERENCES `Visita` (`codice`) ON DELETE RESTRICT
+);

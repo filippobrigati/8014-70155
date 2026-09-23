@@ -1,4 +1,4 @@
-CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`EmettiFattura`(IN p_codice_visita INT, IN p_codice_voucher VARCHAR(50))
+CREATE PROCEDURE `basi_di_dati`.`EmettiFattura`(IN p_codice_visita INT, IN p_codice_voucher VARCHAR(50))
 BEGIN
     DECLARE v_stato VARCHAR(20);
     DECLARE v_data_visita DATE;
@@ -12,36 +12,29 @@ BEGIN
     DECLARE v_cod_assicurazione VARCHAR(50) DEFAULT NULL;
     DECLARE v_prezzo_finale DECIMAL(10,2);
 
-    -- SECURITY CHECK 1: Ensure the Referto exists
     SELECT COUNT(*) INTO v_has_referto FROM Referto WHERE codice_visita = p_codice_visita;
     
     IF v_has_referto = 0 THEN
         SELECT 'ERROR' AS esito, 'Devi prima inserire il referto medico per questa visita.' AS messaggio;
     ELSE
-        -- Get current visit details and the client ID
         SELECT stato, data_visita, ora_inizio, prezzo_applicato, id_cliente 
         INTO v_stato, v_data_visita, v_ora_inizio, v_prezzo, v_id_cliente
         FROM Visita 
         WHERE codice = p_codice_visita;
         
-        -- SECURITY CHECK 2: Verify it's still booked
         IF v_stato = 'prenotata' THEN
-            -- SECURITY CHECK 3: Verify date and time are in the past or present
             IF TIMESTAMP(v_data_visita, v_ora_inizio) <= NOW() THEN
                 
                 START TRANSACTION;
-                
-                -- Mark visit as completata
+
                 UPDATE Visita SET stato = 'completata' WHERE codice = p_codice_visita;
                 
-                -- IF VOUCHER IS EMPTY -> Normal Invoice (ignores insurance)
                 IF p_codice_voucher IS NULL OR p_codice_voucher = '' THEN
                     SET v_num_fattura = CONCAT('F-', DATE_FORMAT(NOW(), '%Y%m%d'), '-', p_codice_visita);
                     
                     INSERT INTO Fattura (numero_fattura, codice_visita, importo_totale, stato)
                     VALUES (v_num_fattura, p_codice_visita, v_prezzo, 'emessa');
                     
-                -- IF VOUCHER IS PROVIDED -> Insurance Invoice (applies insurance if present)
                 ELSE
                     SELECT COALESCE(MAX(a.sconto_percentuale), 0.00), MAX(a.codice)
                     INTO v_sconto, v_cod_assicurazione
@@ -70,23 +63,20 @@ BEGIN
     END IF;
 END;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`EmettiReferto`(IN p_codice_visita INT, IN p_testo_referto TEXT)
+CREATE PROCEDURE `basi_di_dati`.`EmettiReferto`(IN p_codice_visita INT, IN p_testo_referto TEXT)
 BEGIN
     DECLARE v_data_visita DATE;
     DECLARE v_ora_inizio TIME;
     DECLARE v_count INT;
 
-    -- Get the visit date and time
     SELECT data_visita, ora_inizio INTO v_data_visita, v_ora_inizio
     FROM Visita WHERE codice = p_codice_visita;
 
-    -- Check if a report already exists for this visit
     SELECT COUNT(*) INTO v_count FROM Referto WHERE codice_visita = p_codice_visita;
 
     IF v_count > 0 THEN
         SELECT 'ERROR' AS esito, 'Esiste già un referto per questa visita.' AS messaggio;
     ELSEIF TIMESTAMP(v_data_visita, v_ora_inizio) <= NOW() THEN
-        -- Insert the report
         INSERT INTO Referto (codice_visita, testo_referto) VALUES (p_codice_visita, p_testo_referto);
         
         SELECT 'SUCCESS' AS esito, 'Referto salvato con successo.' AS messaggio;
@@ -95,7 +85,7 @@ BEGIN
     END IF;
 END;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`GetAppuntamentiPrenotati`(IN p_id_cliente INT)
+CREATE PROCEDURE `basi_di_dati`.`GetAppuntamentiPrenotati`(IN p_id_cliente INT)
 BEGIN
     SELECT 
         v.codice, v.data_visita, v.ora_inizio, v.prezzo_applicato, 
@@ -117,7 +107,7 @@ BEGIN
     ORDER BY v.data_visita ASC, v.ora_inizio ASC;
 END;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`GetProssimiAppuntamentiMedico`(
+CREATE PROCEDURE `basi_di_dati`.`GetProssimiAppuntamentiMedico`(
     IN p_id_medico INT, 
     IN p_limit INT, 
     IN p_offset INT
@@ -143,7 +133,7 @@ BEGIN
     LIMIT p_limit OFFSET p_offset;
 END;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`GetProssimiAppuntamentiMedico_Count`(
+CREATE PROCEDURE `basi_di_dati`.`GetProssimiAppuntamentiMedico_Count`(
     IN p_id_medico INT
 )
 BEGIN
@@ -154,7 +144,7 @@ BEGIN
       AND v.stato = 'prenotata';
 END;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`registra_sessione`(
+CREATE PROCEDURE `basi_di_dati`.`registra_sessione`(
     IN p_id_utente INT, 
     IN p_token_hash VARCHAR(255), 
     IN p_scadenza TIMESTAMP
@@ -164,7 +154,7 @@ BEGIN
     VALUES (p_id_utente, p_token_hash, p_scadenza);
 END;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`sp_registra_admin_azienda`(
+CREATE PROCEDURE `basi_di_dati`.`sp_registra_admin_azienda`(
     IN p_email VARCHAR(100), IN p_password VARCHAR(255),
     IN p_cf VARCHAR(16), IN p_nome VARCHAR(50), IN p_cognome VARCHAR(50),
     IN p_data_nascita DATE, IN p_sesso CHAR(1),
@@ -175,7 +165,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`sp_registra_admin_az
 BEGIN
     DECLARE v_id_admin INT;
 
-    -- Gestione degli errori: in caso di eccezione annulla tutte le scritture
     DECLARE EXIT HANDLER FOR SQLEXCEPTION
     BEGIN
         ROLLBACK;
@@ -184,28 +173,24 @@ BEGIN
 
     START TRANSACTION;
 
-    -- A. Inserimento Utente (Admin)
     INSERT INTO Utente (email, password_hash, ruolo, codice_fiscale, nome, cognome, data_nascita, sesso)
     VALUES (p_email, p_password, 'admin', p_cf, p_nome, p_cognome, p_data_nascita, p_sesso);
     
     SET v_id_admin = LAST_INSERT_ID();
 
-    -- B. Inserimento CAP (se non esiste già, usiamo IGNORE per evitare errori di duplicazione)
     INSERT IGNORE INTO Citta_CAP (cap, comune, provincia, regione)
     VALUES (p_cap, p_comune, p_provincia, p_regione);
 
-    -- C. Inserimento Centro Medico
     INSERT INTO Centro_Medico (partita_iva, ragione_sociale, via, civico, cap)
     VALUES (p_piva, p_ragione, p_via, p_civico, p_cap);
 
-    -- D. Collegamento Admin_Centro (Tabella ponte creata in fase di normalizzazione logica)
     INSERT INTO Admin_Centro (id_admin, partita_iva_centro)
     VALUES (v_id_admin, p_piva);
 
     COMMIT;
 END;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`sp_registra_utente`(
+CREATE PROCEDURE `basi_di_dati`.`sp_registra_utente`(
     IN p_email VARCHAR(100), 
     IN p_password VARCHAR(255), 
     IN p_ruolo ENUM('admin','medico','cliente'),
@@ -220,7 +205,7 @@ BEGIN
     VALUES (p_email, p_password, p_ruolo, p_cf, p_nome, p_cognome, p_data_nascita, p_sesso);
 END;
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `basi_di_dati`.`valida_sessione`(
+CREATE PROCEDURE `basi_di_dati`.`valida_sessione`(
     IN p_token_hash VARCHAR(255)
 )
 BEGIN

@@ -102,7 +102,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                 <?php foreach ($giorni_settimana as $giorno => $nomeGiorno):
                                     $inizio = $agenda_attuale[$giorno]['inizio'] ?? '';
                                     $fine = $agenda_attuale[$giorno]['fine'] ?? '';
-                                    $hasShift = !empty($inizio) && !empty($fine);
+                                    $riposaQuelGiorno = !empty($inizio) && !empty($fine);
                                     ?>
                                     <tr>
                                         <td>
@@ -119,7 +119,7 @@ while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
                                                 value="<?php echo htmlspecialchars($fine); ?>">
                                         </td>
                                         <td class="text-center">
-                                            <?php if ($hasShift): ?>
+                                            <?php if ($riposaQuelGiorno): ?>
                                                 <span class="badge bg-success">Attivo</span>
                                             <?php else: ?>
                                                 <span class="badge bg-secondary">Riposo</span>

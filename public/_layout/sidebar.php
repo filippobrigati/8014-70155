@@ -5,7 +5,7 @@ $currentPath = $_SERVER['PHP_SELF'];
 // Questa parte serve per cambiare lo stile degli elementi nella lista
 function isActive($path)
 {
-    // Accedo alla variabile globale $currentPath e la confronto con il path passato alla funzione
+    // Accedo alla variabile globale $currentPath e la confronto con il path pasato alla funzione
     global $currentPath;
     return $currentPath === $path ? 'active' : 'link-dark';
 }
